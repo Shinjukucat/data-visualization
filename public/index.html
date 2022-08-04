@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <!-- 在这里这样引入echarts的包后，就可以通过window.echarts拿到这个全局对象 -->
+    <script src="static/lib/echarts.min.js"></script>
   </head>
   <body>
     <noscript>
