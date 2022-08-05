@@ -23,3 +23,8 @@ html, body, #app {
   height: 100%;
   overflow: hidden;
 }
+
+canvas {
+  /* 给整个图表价格圆角 */
+  border-radius: 20px;
+}
