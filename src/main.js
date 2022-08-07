@@ -5,6 +5,8 @@ import store from './store'
 import axios from 'axios'
 // 引入全局样式文件
 import '@/assets/css/global.css'
+// 引入字体图标
+import '@/assets/font/iconfont'
 
 Vue.config.productionTip = false
 

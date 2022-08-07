@@ -5,12 +5,12 @@
 </template>
 
 <script>
-// 商家销售统计图表模块
+// 商家销售统计图表模块 —— 横向柱状图
 export default {
   name: 'Seller',
   data() {
     return {
-      chartInstance: null,
+      chartInstance: null,  // echarts对象
       allData: null,   // 存储所有请求到的数据
       currentPage: 1,  //当前页数
       totalPage: 0,   //总页数
