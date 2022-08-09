@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
 // 地区销售排行模块
 export default {
   name: "Rank",
@@ -16,6 +17,17 @@ export default {
       endValue: 9,   //dataZoom区域缩放的终点
       timer: null
     };
+  },
+  computed: {
+    ...mapState(['Theme']),
+  },
+  watch: {
+    Theme() {
+      this.chartInstance.dispose()  //先要销毁当前的主题
+      this.initChart()  //重新以最新的主题初始化图表对象，此时初始化对象的第二个参数已经更改为新的主题
+      this.screenAdapter()   //更新图表的屏幕适配
+      this.upDataChart()  //更新图表的展示
+    }
   },
   mounted() {
     this.initChart();
@@ -29,7 +41,7 @@ export default {
   },
   methods: {
     initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.rank_ref, 'chalk');
+      this.chartInstance = this.$echarts.init(this.$refs.rank_ref, this.Theme);
       const initOption = {
         title: {
           text: '▎地区销售排行',
@@ -73,7 +85,7 @@ export default {
       this.allData.sort((a, b) => {
         return b.value - a.value
       })
-      console.log(res)
+      // console.log(res)
       this.upDataChart()
       // 数据获取完后开启定时器
       this.moveInterval()

@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
+import {getThemeValue} from '@/utils/theme_utils'
 // 热销商品占比模块
 export default {
   name: 'Hot',
@@ -29,6 +31,7 @@ export default {
     window.removeEventListener('resize', this.screenAdapter)
   },
   computed: {
+    ...mapState(['Theme']),
     pieTitle() {
       // 这里的判断有没有allData很重要，不然数据还没请求回来的时候会找allData报错
       if(! this.allData) {
@@ -39,13 +42,22 @@ export default {
     },
     comStyle() {
       return {
-        fontSize: this.titleFontSize + 'px'
+        fontSize: this.titleFontSize + 'px',
+        color: getThemeValue(this.Theme).titleColor
       }
+    }
+  },
+  watch: {
+    Theme() {
+      this.chartInstance.dispose()  //先要销毁当前的主题
+      this.initChart()  //重新以最新的主题初始化图表对象，此时初始化对象的第二个参数已经更改为新的主题
+      this.screenAdapter()   //更新图表的屏幕适配
+      this.upDataChart()  //更新图表的展示
     }
   },
   methods: {
     initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.hot_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.hot_ref, this.Theme)
       const initOption = {
         title: {
           text: '▎热销商品占比',
@@ -93,7 +105,7 @@ export default {
     },
     async getHotData() {
       const {data : res} = await this.$http.get('hotproduct')
-      console.log(res)
+      // console.log(res)
       this.allData = res
       this.upDataChart()
     },
@@ -130,8 +142,8 @@ export default {
           }
         },
         legend: {
-          itemWidh: this.titleFontSize / 2,
-          itemHeight: this.titleFontSize / 2,
+          itemWidh: this.titleFontSize,
+          itemHeight: this.titleFontSize,
           itemGap: this.titleFontSize / 2,
           textStyle: {
             fontSize: this.titleFontSize / 2
@@ -163,7 +175,7 @@ export default {
 .arr-left {
   position: absolute;
   left: 10%;
-  top: 50%;
+  top: 60%;
   transform: translateY(-50%);
   cursor: pointer;
   color: #FFF;
@@ -171,15 +183,16 @@ export default {
 .arr-right {
   position: absolute;
   right: 10%;
-  top: 50%;
+  top: 60%;
   transform: translateY(-50%);
   cursor: pointer;
   color: #FFF;
 }
 .pieTitle {
   position: absolute;
-  left: 80%;
+  left: 50%;
   bottom: 20px;
   color: #FFF;
+  transform: translateX(-50%);
 }
 </style>

@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
 // 商家地图分部模块
 import axios from 'axios'
 // 导入硬核汉字转拼音的包/轮子
@@ -18,6 +19,17 @@ export default {
       provinceData: {}  //存储第一次发请求时获取到的省的矢量数据，做一次缓存，下一次判断如果已经请求过的话就不用再请求了
     }
   },
+  computed: {
+    ...mapState(['Theme']),
+  },
+  watch: {
+    Theme() {
+      this.chartInstance.dispose()  //先要销毁当前的主题
+      this.initChart()  //重新以最新的主题初始化图表对象，此时初始化对象的第二个参数已经更改为新的主题
+      this.screenAdapter()   //更新图表的屏幕适配
+      this.upDataChart()  //更新图表的展示
+    }
+  },
   mounted() {
     this.initChart()
     this.getMapData()
@@ -29,7 +41,7 @@ export default {
   },
   methods: {
     async initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.map_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.map_ref, this.Theme)
       // 获取中国地图的矢量数据
       // 由于中国地图的矢量数据在前端端口上，所以不能用$http,需要借助axios发送新基础路径请求
       const res = await axios.get('http://localhost:8090/static/map/china.json')
@@ -63,7 +75,7 @@ export default {
         // 这个arg参数可以显示点击身份的信息
         // console.log(arg)
         const provinceInfo = getProvinceMapInfo(arg.name)
-        console.log(provinceInfo)
+        // console.log(provinceInfo)
         if(! this.provinceData[provinceInfo.key]) {
           const res = await axios.get('http://localhost:8090' + provinceInfo.path)
           this.provinceData[provinceInfo.key] = res.data
@@ -81,7 +93,7 @@ export default {
       // 发请求获取数据，对this.allData进行赋值后，调用updataChart方法更新图表
       const {data: res} = await this.$http.get('map')
       this.allData = res
-      console.log(res)
+      // console.log(res)
       this.upDataChart()
     },
     upDataChart() {

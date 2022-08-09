@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
 export default {
   name: 'Stock',
   data() {
@@ -13,6 +14,17 @@ export default {
       allData: null,
       currentIndex: 0,  //这里有十条数据，每次显示五条，这个属性用来控制数据切换
       timer: null  //控制数据切换的定时器
+    }
+  },
+  computed: {
+    ...mapState(['Theme']),
+  },
+  watch: {
+    Theme() {
+      this.chartInstance.dispose()  //先要销毁当前的主题
+      this.initChart()  //重新以最新的主题初始化图表对象，此时初始化对象的第二个参数已经更改为新的主题
+      this.screenAdapter()   //更新图表的屏幕适配
+      this.upDataChart()  //更新图表的展示
     }
   },
   mounted() {
@@ -27,7 +39,7 @@ export default {
   },
   methods: {
     initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.stock_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.stock_ref, this.Theme)
       const initOption = {
         title: {
           text: '▎库存和销量分析',
@@ -45,7 +57,7 @@ export default {
     },
     async getStockData() {
       const {data : res} = await this.$http.get('stock')
-      console.log(res)
+      // console.log(res)
       this.allData = res
       this.upDataChart()
       this.changeInterval()
@@ -72,7 +84,7 @@ export default {
       const seriesArr = showData.map((item, index) => {
         return {
           type: 'pie',
-          radius: [110, 100],  //通过给饼图设置两个半径内圆半径和外圆半径来实现圆环效果
+          // radius: [110, 100],  //通过给饼图设置两个半径内圆半径和外圆半径来实现圆环效果
           center: centerArr[index],
           hoverAnimation: false,  //移除鼠标移入时的动画效果
           labelLine: {
@@ -86,7 +98,7 @@ export default {
             // 圆环图中有两个数据：销量和库存，圆环左边数据是库存，右边数据是销量
             {
               // 销量 右边
-              name: item.name + '\n' + item.sales,
+              name: item.name + '\n\n' + item.sales,
               value: item.sales,
               itemStyle: {
                 color: new this.$echarts.graphic.LinearGradient(0, 1, 0, 0, [
@@ -118,8 +130,8 @@ export default {
     },
     screenAdapter() {
       const titleFontSize = this.$refs.stock_ref.offsetWidth / 100 * 3.6
-      const innerRadius = titleFontSize * 2
-      const outerRadius = titleFontSize * 1.125
+      const innerRadius = titleFontSize * 2.8
+      const outerRadius = titleFontSize * 2.2
       const adapterOption = {
         title: {
           textStyle: {

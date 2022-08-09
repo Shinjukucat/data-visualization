@@ -28,3 +28,7 @@ canvas {
   /* 给整个图表价格圆角 */
   border-radius: 20px;
 }
+
+.com-container {
+  position: relative;
+}

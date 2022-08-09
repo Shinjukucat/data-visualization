@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
 // 商家销售统计图表模块 —— 横向柱状图
 export default {
   name: 'Seller',
@@ -15,6 +16,17 @@ export default {
       currentPage: 1,  //当前页数
       totalPage: 0,   //总页数
       timer: null,    //定时器的标识，方便清除定时器
+    }
+  },
+  computed: {
+    ...mapState(['Theme']),
+  },
+  watch: {
+    Theme() {
+      this.chartInstance.dispose()  //先要销毁当前的主题
+      this.initChart()  //重新以最新的主题初始化图表对象，此时初始化对象的第二个参数已经更改为新的主题
+      this.screenAdapter()   //更新图表的屏幕适配
+      this.upDataChart()  //更新图表的展示
     }
   },
   mounted() {
@@ -37,7 +49,7 @@ export default {
     // 初始化echartsInstancs对象
     initChart() {
       // init方法里面的第一个参数就是图表最终显示的Dom元素，第二个是主题的名字
-      this.chartInstance = this.$echarts.init(this.$refs.seller_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.seller_ref, this.Theme)
       // 对图表初始化配置的控制 initOption属于初始化配置
       const initOption = {
         title: {

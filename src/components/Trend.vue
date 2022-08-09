@@ -1,6 +1,6 @@
 <template>
   <div class="com-container">
-    <div class="title" :style="titleSize">
+    <div class="title" :style="titleStyle">
       <span>{{'▎' + showSelectTitle}}</span>
       <!-- <span class="iconfont"∨>&#xe6eb;</span> -->
       <span class="title-icon" @click="showSelect">∨</span>
@@ -13,6 +13,8 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
+import {getThemeValue} from '@/utils/theme_utils'
 // 销量趋势图表模块
 export default {
   name: 'Trend',
@@ -36,6 +38,7 @@ export default {
     window.removeEventListener('resize', this.screenAdapter)
   },
   computed: {
+    ...mapState(['Theme']),
     selectType() {
       if(! this.allData) {
         return []
@@ -54,9 +57,10 @@ export default {
       }
     },
     // 因为文字部分不是使用echarts的方法设置的，所以需要另外动态设置样式来实现自适应
-    titleSize() {
+    titleStyle() {
       return {
-        fontSize: this.titleFontSize + 'px'
+        fontSize: this.titleFontSize + 'px',
+        color: getThemeValue(this.Theme).titleColor
       }
     },
     // 解决下拉框里面的文字不对齐的问题
@@ -64,12 +68,20 @@ export default {
       return {
         marginLeft: this.titleFontSize / 2 + 'px'
       }
+    },
+  },
+  watch: {
+    Theme() {
+      this.chartInstance.dispose()  //先要销毁当前的主题
+      this.initChart()  //重新以最新的主题初始化图表对象，此时初始化对象的第二个参数已经更改为新的主题
+      this.screenAdapter()   //更新图表的屏幕适配
+      this.upDataChart()  //更新图表的展示
     }
   },
   methods: {
     initChart() {
       // 下面这句初始化了一个echart实例对象并将其赋值给chartInstance，让chartInstance来代表这个实例对象
-      this.chartInstance = this.$echarts.init(this.$refs.trend_ref, 'chalk')
+      this.chartInstance = this.$echarts.init(this.$refs.trend_ref, this.Theme)
       const initOption = {
         // grid配置坐标轴大小
         grid: {
@@ -102,7 +114,7 @@ export default {
       // 发请求
       // 保存到allData
       const {data : res} = await this.$http.get('trend')
-      console.log(res)
+      // console.log(res)
       this.allData = res
       this.upDataChart()
     },
